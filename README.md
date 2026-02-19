@@ -14,3 +14,9 @@ Users must obtain firmware from the original upstream projects.
 
 All files in this repository are licensed under GNU GPL v3.0,
 consistent with the upstream firmware projects.
+
+## Hardware Platform
+
+Mechanical design files and documentation:
+
+https://github.com/sunnyday-technologies/M3-CRETE
