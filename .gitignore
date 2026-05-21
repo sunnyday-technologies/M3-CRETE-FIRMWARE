@@ -1,0 +1,32 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code config (local-only)
+.claude/
+
+# Python (if any tooling lives here)
+__pycache__/
+*.pyc
+.venv/
+
+# Build artifacts
+build/
+dist/
+
+# Secrets / environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
