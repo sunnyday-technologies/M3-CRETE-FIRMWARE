@@ -118,6 +118,26 @@ else
   info "Skipping KlipperScreen (--no-screen)"
 fi
 
+# ---- 3b. Pi 5 Xorg fix ------------------------------------------------------
+# The Pi 5 exposes two DRM devices (card0 = V3D render, card1 = vc4 display).
+# Stock Xorg picks V3D as primary, falls back to framebuffer mode, and dies
+# with "Cannot run in framebuffer mode" — KlipperScreen then crash-loops.
+# Pinning the vc4 display device as primary GPU fixes it.
+if [ "$INSTALL_SCREEN" -eq 1 ] && grep -q "Raspberry Pi 5" /proc/device-tree/model 2>/dev/null; then
+  if [ ! -f /etc/X11/xorg.conf.d/99-vc4.conf ]; then
+    info "Applying Pi 5 Xorg primary-GPU fix (99-vc4.conf)"
+    sudo mkdir -p /etc/X11/xorg.conf.d
+    sudo tee /etc/X11/xorg.conf.d/99-vc4.conf > /dev/null <<'XEOF'
+Section "OutputClass"
+    Identifier "vc4"
+    MatchDriver "vc4"
+    Driver "modesetting"
+    Option "PrimaryGPU" "true"
+EndSection
+XEOF
+  fi
+fi
+
 # ---- 4. best-effort serial auto-detect ------------------------------------
 mapfile -t SERIALS < <(ls /dev/serial/by-id/ 2>/dev/null | grep -i klipper || true)
 if [ "${#SERIALS[@]}" -eq 1 ]; then
