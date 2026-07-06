@@ -38,6 +38,40 @@ After the Pi is up, **build + flash Klipper firmware onto the Kraken** (flags ar
 the header of `printer.cfg`), then drop `printer.cfg` into
 `~/printer_data/config/` and restart Klipper.
 
+### Building the firmware — one critical checkbox
+
+In `make menuconfig`, **first enable `[*] Enable extra low-level configuration
+options`.** The "Bootloader offset" and "Clock Reference" menus only exist behind
+that checkbox — skip it and the build silently assumes the wrong crystal, producing
+firmware that boots dead (no USB device, no error, nothing). Then set: STM32 →
+STM32H723 → 128KiB bootloader → **25 MHz crystal** → USB (PA11/PA12).
+
+### Flashing over USB (DFU) — no SD card needed
+
+The STM32's ROM has a built-in USB bootloader that always works, regardless of what
+is (or isn't) in flash:
+
+1. Connect the Kraken's **USB-C** port to the Pi. ⚠️ Use a **data** cable — phone
+   charge-only cables fit perfectly and carry nothing. ⚠️ The Kraken's **USB-A port
+   is a 5 V power output**, not a data port.
+2. Hold **BOOT0**, tap **RESET**, release BOOT0 (buttons are in a row:
+   RESET · BOOT0 · BOOT1). `lsusb` on the Pi should now show
+   `0483:df11 STMicroelectronics STM Device in DFU Mode`.
+3. `cd ~/klipper && make flash FLASH_DEVICE=0483:df11`
+4. `dfu-util` often ends with `Error during download get_status` — **this is
+   harmless**; the flash already succeeded. Tap RESET and check for
+   `/dev/serial/by-id/usb-Klipper_stm32h723xx_*`.
+
+### Troubleshooting a board that won't talk
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| No USB device ever, even in DFU | Charge-only cable, wrong port (USB-A), or no logic power | Data cable into USB-C; check the 24 V **POWER** terminal (separate from MOTOR-POWER) |
+| SD flash does nothing — `firmware.bin` never becomes `FIRMWARE.CUR` | Board shipped with **blank flash** (no BTT bootloader) — it happens | Flash via DFU (above), or install BTT's bootloader first ([their repo](https://github.com/bigtreetech/BIGTREETECH-Kraken/tree/master/Firmware), `Kraken_H723_bootloader.bin` + dfu-util to `0x8000000`) |
+| DFU works, but after RESET the board is silent | Firmware built without the low-level checkbox (wrong clock), **or** flaky bootloader→app handoff | Rebuild with **25 MHz crystal**. If it still only runs intermittently, build with Bootloader offset = **No bootloader** and DFU-flash to `0x08000000` — the board then boots Klipper directly (SD flashing is dead on such boards anyway; future updates go via DFU) |
+| Endless `device not responding to setup address` / `error -71` in `dmesg` | Firmware running with wrong clock — USB bit-timing off | Rebuild with the checkbox + 25 MHz crystal |
+| Board enumerates via a "Genesys Logic Hub" you don't recognize | Active/repeater USB extension cable | Fine when it works, but flaky — prefer a short passive cable into a Pi **USB 2.0** port |
+
 ---
 
 ## 1. Z-axis bring-up (current stage)
