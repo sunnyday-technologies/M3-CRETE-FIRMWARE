@@ -39,7 +39,7 @@ die()   { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" -ne 0 ] || die "Do NOT run as root/sudo. Run as the user that owns Klipper (e.g. 'pi')."
 
-REPO_DIR="$(cd "$(dirname "$0")" && git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 PRINTER_DATA="${PRINTER_DATA:-$HOME/printer_data}"
 CONFIG_DIR="$PRINTER_DATA/config"
 STAMP="$(date +%Y%m%d-%H%M%S)"
