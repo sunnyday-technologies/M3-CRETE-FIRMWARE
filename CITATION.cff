@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use the M3-CRETE firmware configuration in your work, please cite it as below."
+title: "M3-CRETE Firmware: Configuration and Setup for the M3-CRETE Concrete 3D Printer"
+abstract: >-
+  Firmware configuration files and optional patches for operating the
+  M3-CRETE open-hardware concrete 3D printer. Provides Marlin and Klipper
+  configurations plus install tooling; upstream firmware source is obtained
+  from its original projects and is not redistributed here.
+type: software
+authors:
+  - family-names: Sonnentag
+    given-names: Nicholas
+    email: info@sunn3d.com
+    affiliation: Sunnyday Technologies
+    orcid: "https://orcid.org/0009-0002-1897-384X"
+license: GPL-3.0-only
+repository-code: "https://github.com/sunnyday-technologies/M3-CRETE-FIRMWARE"
+url: "https://m3-crete.com"
+keywords:
+  - 3D-printing
+  - concrete
+  - firmware
+  - klipper
+  - marlin
+  - open-hardware
+  - 3DCP
+  - additive-manufacturing
