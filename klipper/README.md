@@ -126,14 +126,21 @@ homing). Then in the Mainsail console, **in this order**:
   (`23HS45-4204S1`, 3 N·m / 4.2 A); this config targets the 2.8 A motor. If the BOM
   is the intended part, currents need to go up.
 - **Extruder motor (8th):** StepperOnline **23HS30-2804S** — NEMA23, 1.9 N·m,
-  2.8 A/phase (larger body, same current class → same `sense_resistor`/current range).
+  2.8 A/phase (larger body, same current class → same current range). Its
+  `sense_resistor` follows the slot it is wired to — see below.
 - **Pressure pump (9th):** **MAI 2PUMP Pictor**, ~0.7–15.5 L/min, **0–10 V** analog
   speed command + a run/enable input — not a Kraken stepper. See Stage 3 below.
 - **Kraken specifics that bite people:** onboard drivers use **software SPI**
-  (PC6/PC8/PC7) and **`sense_resistor: 0.022`**. Generic TMC5160 configs you find
-  online use hardware SPI and 0.075 — those values will set the wrong motor current
-  here. Pins in `printer.cfg` come from BTT's official
-  `generic-bigtreetech-kraken.cfg`.
+  (PC6/PC8/PC7), and **`sense_resistor` depends on the slot**. On our Kraken v1.0,
+  slots S1–S4 are **0.022** and slots S5–S8 are **0.075**. (A Kraken V1.1 uses
+  0.050 on S1–S4.) Klipper computes motor current from this value, so a wrong one
+  silently scales it: 0.075 on S1–S4 gives about 3.4× `run_current`, and 0.022 on
+  S5–S8 gives about 0.29×. Stage 1 uses only S1–S4. Stage 2 puts X on S5 and Y on
+  S6, so those sections need 0.075, and so does any later motor on S7/S8.
+  Generic TMC5160 configs you find online use hardware SPI and a single value for
+  every driver — don't copy them. Pins and sense resistors come from BTT's
+  official `generic-bigtreetech-kraken.cfg`, cross-checked against BTT's
+  [Kraken wiki](https://global.bttwiki.com/Kraken.html).
 
 ### Stage 3 preview — extruder (stepper) + pressure pump (analog command)
 
