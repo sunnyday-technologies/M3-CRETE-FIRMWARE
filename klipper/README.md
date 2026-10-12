@@ -102,11 +102,11 @@ homing). Then in the Mainsail console, **in this order**:
    (coplanar, no probe, no switches), then the gantry lifts 10 mm.
 6. **Measure** — set `position_endstop` and `position_min` to the nozzle height
    above the build surface with the carriages on the blocks. `position_max` is
-   `position_endstop` + stroke − 10 mm. It ships as 718: the CAD-derived stroke
-   of 728.05 mm with `position_endstop` still at 0. Add your measured
-   `position_endstop` to it, and confirm the top of travel on SN 001 with slow
-   jogs before raising it. A lead screw does not slip if it is driven into a
-   hard limit.
+   `position_endstop` + stroke − 10 mm, rounded down. It ships as 718: the
+   CAD-derived stroke of 728.87 mm with `position_endstop` still at 0. Add
+   your measured `position_endstop` to it, and confirm the top of travel on
+   SN 001 with slow jogs before raising it. A lead screw does not slip if it
+   is driven into a hard limit.
 
 ### What the macros do
 | Macro | Action |
