@@ -9,7 +9,7 @@ testable checkpoint — don't move to the next until the current one passes.
 
 | Stage | File | Scope | Status |
 |-------|------|-------|--------|
-| **1** | [`printer.cfg`](printer.cfg) | 4× Z motors, sensorless StallGuard homing | **active** |
+| **1** | [`printer.cfg`](printer.cfg) | 4× Z motors on Tr8x2 lead screws, sensorless StallGuard homing down | **active** |
 | 2 | _tbd_ | + X (belt-pinion) and Y (dual, anti-rack) | planned |
 | 3 | _tbd_ | + extruder (stepper) + MAI Pictor pump (0–10 V analog cmd) | planned |
 | 4 | _tbd_ | + input shaping (ADXL345), print macros, flush/prime | planned |
@@ -91,11 +91,19 @@ homing). Then in the Mainsail console, **in this order**:
 4. **Set current, then tune StallGuard** — raise `run_current` toward your load
    (1.5–1.8 A; never above ~2.0 A RMS for these 2.8 A motors), then tune
    `driver_SGT` per slot. Watch live load with `ZSTATUS`.
-   - Stalls early / before the brace → **raise** `driver_SGT` (less sensitive)
-   - Crashes the brace without stopping → **lower** `driver_SGT` (more sensitive)
+   - Stalls early / before the block → **raise** `driver_SGT` (less sensitive)
+   - Pushes into the block without stopping → **lower** `driver_SGT` (more sensitive)
    - `FIRMWARE_RESTART` after each change. Re-tune if you change `run_current`.
-5. **Home** — `HOME_Z`. All four corners drive up and each zeroes itself at its
-   own stall point against the top brace (coplanar, no probe).
+   - Tune at the homing current `HOME_Z` uses: 0.6 A by default, or
+     `HOME_Z CURRENT=…`. A lead screw turns motor torque into a large axial
+     force, so use the lowest current that still moves the gantry reliably.
+5. **Home** — clear the build area, then `HOME_Z`. All four corners drive down
+   and each zeroes itself at its own stall point on its bottom hard-stop block
+   (coplanar, no probe, no switches), then the gantry lifts 10 mm.
+6. **Measure** — set `position_endstop` and `position_min` to the nozzle height
+   above the build surface with the carriages on the blocks, and set
+   `position_max` below the measured travel. A lead screw does not slip if it is
+   driven into the top mount.
 
 ### What the macros do
 | Macro | Action |
@@ -103,7 +111,7 @@ homing). Then in the Mainsail console, **in this order**:
 | `ZHOLD` / `ZRELEASE` | energize / free all 4 Z motors |
 | `ZJOG MOTOR=n DIST=mm VEL=mm/s` | open-loop jog of one motor (spin/direction check) |
 | `ZSTATUS` | dump TMC StallGuard + driver state for SGT tuning |
-| `HOME_Z` | sensorless quad-Z home (`G28 Z`) + 5 mm back-off |
+| `HOME_Z [CURRENT=A]` | sensorless quad-Z home down (`G28 Z`) at reduced current + 10 mm lift |
 
 > ⚠️ X and Y are **inert stubs** in this stage (no motors, no driver config) — they
 > only exist so Klipper's kinematics will load. **Do not jog or home X/Y, and do not
