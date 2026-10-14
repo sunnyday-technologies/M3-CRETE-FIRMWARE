@@ -122,6 +122,34 @@ homing). Then in the Mainsail console, **in this order**:
 
 ---
 
+## E-stop monitoring and motor power (`estop.cfg`, not loaded yet)
+
+`estop.cfg` is a software layer on top of the hardware E-stop. The E-stop button
+removes motor power in hardware by itself; this file does not replace it.
+
+- It watches the E-stop button's extra contact on Kraken endstop port 8 (MIN8,
+  PC0). A press shuts Klipper down at once and is logged.
+- It drives the Kraken PS-ON output (PD10), which allows motor power. Klipper
+  starts with it off, and any Klipper shutdown switches it off.
+- `MOTOR_POWER VALUE=1` / `VALUE=0` switches motor power and refuses to switch
+  on while the E-stop reads pressed. Mainsail's power button calls it.
+
+Enable it only after the hardware is installed and tested:
+
+1. Uncomment `[include estop.cfg]` in `printer.cfg`. `install.sh` replaces
+   `printer.cfg`, so once this is tested, make the same change in this repo.
+2. Add the `[power motor_power]` block from this repo's `moonraker.conf` to the
+   Pi's `moonraker.conf`.
+3. `FIRMWARE_RESTART`, then restart Moonraker.
+4. Test with the axes clear: switch motor power on; press the E-stop and check
+   that Klipper shuts down and motor power drops; check that
+   `MOTOR_POWER VALUE=1` is refused while the E-stop is pressed; release it,
+   `FIRMWARE_RESTART`, switch motor power on and re-home.
+
+Keep the S8 DIAG jumper off: it shares the MIN8 pin.
+
+---
+
 ## Hardware notes / open items
 
 - **Motion motors (X/Y/Z, 7×):** StepperOnline **23HS22-2804S** — NEMA23, 1.24 N·m,

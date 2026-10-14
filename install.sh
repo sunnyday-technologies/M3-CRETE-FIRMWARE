@@ -7,7 +7,8 @@
 # Klipper/Moonraker/Mainsail — those stay upstream and self-update via Moonraker.
 #
 # What it does:
-#   1. Drops our printer.cfg into ~/printer_data/config (backing up any existing)
+#   1. Drops our printer.cfg and estop.cfg into ~/printer_data/config (backing
+#      up any existing)
 #   2. Adds the M3-CRETE + KlipperScreen update_manager blocks to moonraker.conf
 #      (without clobbering an existing MainsailOS moonraker.conf)
 #   3. Optionally installs KlipperScreen (Pi touchscreen UI)
@@ -59,6 +60,15 @@ if [ -f "$DEST_CFG" ] && [ "$FORCE" -eq 0 ]; then
 fi
 cp -a "$REPO_DIR/klipper/printer.cfg" "$DEST_CFG"
 info "Installed printer.cfg"
+
+# estop.cfg does nothing until printer.cfg includes it (see README).
+DEST_ESTOP="$CONFIG_DIR/estop.cfg"
+if [ -f "$DEST_ESTOP" ] && [ "$FORCE" -eq 0 ] && ! cmp -s "$REPO_DIR/klipper/estop.cfg" "$DEST_ESTOP"; then
+  cp -a "$DEST_ESTOP" "$DEST_ESTOP.bak.$STAMP"
+  warn "Backed up existing estop.cfg -> estop.cfg.bak.$STAMP"
+fi
+cp -a "$REPO_DIR/klipper/estop.cfg" "$DEST_ESTOP"
+info "Installed estop.cfg (not loaded until printer.cfg includes it)"
 # NOTE: this is YOUR working copy — edit serial/tuning here. To adopt a newer
 # repo version later: git pull, then re-run install.sh (it backs up first).
 
